@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  frontend:
+    # container_name: Frontend-introduction-to-distributed-technologies
+    # environment:
+    #   "REACT_APP_USERNAME": "Ivan Glebov"
+    #   "REACT_APP_COMPANY_NAME": "IotaGroup"
+    build:
+      dockerfile: Dockerfile
+      context: ./
+
+    ports:
+      - "3001:3000"
