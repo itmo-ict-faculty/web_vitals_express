@@ -1,5 +1,7 @@
 import * as esbuild from "esbuild";
 
+import { swcPlugin } from "esbuild-plugin-swc";
+
 await esbuild.build({
   entryPoints: ["./src/index.tsx"],
   bundle: true,
@@ -8,6 +10,7 @@ await esbuild.build({
   logLevel: "info",
   splitting: true,
   format: "esm",
+  plugins: [swcPlugin()],
   loader: {
     ".svg": "text",
     ".ts": "ts",
