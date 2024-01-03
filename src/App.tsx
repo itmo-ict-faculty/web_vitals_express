@@ -19,6 +19,7 @@ function App() {
   }, []);
 
   const [config, setConfig] = useState<Record<string, string>>({});
+
   const [averageDelay, setAverageDelay] = useState<number>(0);
   const [rps, setRps] = useState<number>(0);
 
