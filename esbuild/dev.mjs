@@ -1,6 +1,7 @@
 import * as esbuild from "esbuild";
 
-import { swcPlugin } from "esbuild-plugin-swc";
+import { copy } from "esbuild-plugin-copy";
+// import { swcPlugin } from "esbuild-plugin-swc";
 
 const context = await esbuild.context({
   entryPoints: ["./src/index.tsx"],
@@ -10,12 +11,23 @@ const context = await esbuild.context({
   logLevel: "info",
   splitting: true,
   format: "esm",
-  plugins: [swcPlugin()],
+  sourcemap: true,
+  plugins: [
+    copy({
+      resolveFrom: "cwd",
+      assets: {
+        from: ["./public/*"],
+        to: ["./build/"],
+      },
+    }),
+    // swcPlugin(),
+  ],
   loader: {
     ".svg": "text",
     ".ts": "ts",
     ".tsx": "tsx",
     ".jsx": "jsx",
+    ".js": "js",
   },
 });
 
