@@ -3,10 +3,10 @@ RUN mkdir -p ~/frontend
 
 WORKDIR frontend
 
-COPY . .
-
 RUN npm install
 RUN npm run build
+
+COPY . .
 
 EXPOSE 3000
 
