@@ -1,7 +1,5 @@
-const async = require("async");
 const path = require("path");
 const express = require("express");
-const { execSync } = require("child_process");
 const process = require("process");
 const { debug } = require("console");
 const os = require("os");
@@ -36,10 +34,6 @@ const httpRequestDurationMicroseconds = new Prometheus.Histogram({
     10000,
   ],
 });
-
-console.log("Builing frontend");
-execSync("npm run build");
-console.log("build finished");
 
 app.use(express.static(path.join(__dirname, buildDirName)));
 
