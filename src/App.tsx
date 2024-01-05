@@ -3,6 +3,31 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Queue from "./queue";
 
 function App() {
+  const [config, setConfig] = useState<Record<string, string>>({});
+
+  const [averageDelay, setAverageDelay] = useState<number>(0);
+  const [rps, setRps] = useState<number>(0);
+
+  const [pingTimer, setPingTimer] = useState<ReturnType<typeof setInterval>>();
+  const [pingInterval, setPingInterval] = useState<number>(100);
+  const [tempPingInterval, setTempPingInterval] = useState<number>(100);
+
+  // Response delay in ms
+  const [delay, setDelay] = useState<number>(0);
+
+  const pingIntervalInputRef = useRef<HTMLInputElement>(null);
+
+  const setNewResponseDelay = useCallback(() => {
+    fetch(`${window.origin}/setResponseDelay`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ delay }),
+    });
+  }, [delay]);
+
+  // App alive status
   useEffect(() => {
     let counter = 0;
     console.log("---------------------------------------------------------");
@@ -18,31 +43,7 @@ function App() {
     };
   }, []);
 
-  const [config, setConfig] = useState<Record<string, string>>({});
-
-  const [averageDelay, setAverageDelay] = useState<number>(0);
-  const [rps, setRps] = useState<number>(0);
-
-  const [pingInterval, setPingInterval] = useState<number>(100);
-  const [tempPingInterval, setTempPingInterval] = useState<number>(100);
-
-  // Response delay in ms
-  const [delay, setDelay] = useState<number>(50);
-
-  const pingIntervalInputRef = useRef<HTMLInputElement>(null);
-
-  const setNewResponseDelay = useCallback(() => {
-    fetch(`${window.origin}/setResponseDelay`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ delay }),
-    });
-  }, [delay]);
-
-  // Start coutner for requests average response time
-  useEffect(() => {
+  const startPinger = () => {
     const requests = new Queue({ maxSize: 10 });
 
     const timer = setInterval(() => {
@@ -56,12 +57,14 @@ function App() {
         setAverageDelay(requests.getAverage());
       });
     }, pingInterval);
+    clearInterval(pingTimer);
+    setPingTimer(timer);
+  };
 
-    return () => {
-      clearInterval(timer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pingInterval]);
+  const stopPinger = () => {
+    clearInterval(pingTimer);
+    setPingTimer(undefined);
+  };
 
   useEffect(() => {
     fetch(`${window.origin}/config`)
@@ -76,7 +79,7 @@ function App() {
       fetch(`${window.origin}/rps`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.rps) {
+          if (data.rps !== undefined) {
             setRps(data.rps);
           }
         });
@@ -101,26 +104,40 @@ function App() {
       <div>Server overall RPS (excluding 2rps from this request): {rps}</div>
       <div>
         <div>Set new ping interval</div>
-        <input
-          value={tempPingInterval}
-          onChange={(e) => setTempPingInterval(Number(e.target.value))}
-          ref={pingIntervalInputRef}
-        />
-        <button
-          onClick={() => {
-            setPingInterval(tempPingInterval);
-          }}
-        >
-          Apply
-        </button>
+        <div className="div-center mt-16">
+          <input
+            value={tempPingInterval}
+            onChange={(e) => setTempPingInterval(Number(e.target.value))}
+            ref={pingIntervalInputRef}
+          />
+          <button
+            onClick={() => {
+              setPingInterval(tempPingInterval);
+            }}
+          >
+            Apply
+          </button>
+        </div>
       </div>
       <div>
         <div>Server response delay</div>
-        <input
-          value={delay}
-          onChange={(e) => setDelay(Number(e.target.value))}
-        />
-        <button onClick={setNewResponseDelay}>Set new delay</button>
+        <div className="div-center mt-16">
+          <input
+            value={delay}
+            onChange={(e) => setDelay(Number(e.target.value))}
+          />
+          <button onClick={setNewResponseDelay}>Set new delay</button>
+        </div>
+      </div>
+      <div>
+        <div>
+          Ping controls. Pinger:{" "}
+          {pingTimer !== undefined ? "running" : "stopped"}
+        </div>
+        <div className="div-center mt-16">
+          <button onClick={startPinger}>Start pinger</button>
+          <button onClick={stopPinger}>Stop pinger</button>
+        </div>
       </div>
     </div>
   );

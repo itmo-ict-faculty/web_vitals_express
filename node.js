@@ -14,7 +14,7 @@ const port = 3000;
 
 let server = undefined;
 // Requests response delay. Default - 50ms
-let delay = 50;
+let delay = 0;
 // Array to store requests timestamps for the last secons
 let rpsArray = [];
 
