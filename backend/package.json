@@ -1,0 +1,28 @@
+{
+  "name": "web_vitals_express_backend",
+  "version": "0.1.0",
+  "private": false,
+  "dependencies": {
+    "cors": "^2.8.5",
+    "esbuild": "^0.19.11",
+    "esbuild-copy-plugin": "^1.0.0",
+    "esbuild-plugin-copy": "^2.1.1",
+    "eslint": "^8.3.0",
+    "express": "^4.18.2",
+    "ip": "^1.1.8",
+    "prom-client": "^15.1.0"
+  },
+  "scripts": {
+    "start": "node ./build/index.js",
+    "build": "node scripts/esbuild.mjs"
+  },
+  "eslintConfig": {
+    "extends": [
+      "airbnb"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.69",
+    "esbuild-plugin-swc": "^1.0.1"
+  }
+}

@@ -9,10 +9,6 @@ Provided data:
 - RPS
 - Average requests latency
 
-Available options:
-
-- Change additional express server latency. Default - 50ms.
-
 ## Starting
 
 Run the following command to build and run docker container.

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/pages/App/index.css"],
+  "sourcesContent": [".App {\n  height: calc(100vh - 30px);\n  width: 100vw;\n  padding-top: 30px;\n  background-color: cornflowerblue;\n  color: white;\n  font-size: 2rem;\n  display: flex;\n  gap: 30px;\n  flex-direction: column;\n  align-items: center;\n  justify-content: flex-start;\n}\n\n.div-center {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  flex-direction: row;\n  gap: 16px;\n}\n\n.mt-16 {\n  margin-top: 16px;\n}\n"],
+  "mappings": ";;AAAA,CAAC;AACC,UAAQ,KAAK,MAAM,EAAE;AACrB,SAAO;AACP,eAAa;AACb,oBAAkB;AAClB,SAAO;AACP,aAAW;AACX,WAAS;AACT,OAAK;AACL,kBAAgB;AAChB,eAAa;AACb,mBAAiB;AACnB;AAEA,CAAC;AACC,WAAS;AACT,mBAAiB;AACjB,eAAa;AACb,kBAAgB;AAChB,OAAK;AACP;AAEA,CAAC;AACC,cAAY;AACd;",
+  "names": []
+}
