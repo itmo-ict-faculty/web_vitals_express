@@ -1,12 +1,12 @@
-const path = require("path");
 import cors from "cors";
-const express = require("express");
-const process = require("process");
-const { debug } = require("console");
-const os = require("os");
-const ip = require("ip");
-const bodyParser = require("body-parser");
-const Prometheus = require("prom-client");
+import Timer from "./class/timer";
+import express from "express";
+import process from "process";
+import { debug } from "console";
+import os from "os";
+import ip from "ip";
+import bodyParser from "body-parser";
+import Prometheus from "prom-client";
 
 const app = express();
 
@@ -17,7 +17,7 @@ let server = undefined;
 // Requests response delay. Default - 50ms
 let delay = 0;
 // Array to store requests timestamps for the last secons
-let rpsArray = [];
+let rpsArray: number[] = [];
 
 const jsonParser = bodyParser.json();
 
@@ -37,37 +37,45 @@ const httpRequestDurationMicroseconds = new Prometheus.Histogram({
 });
 
 app.use(cors());
-// app.use(express.static(path.join(__dirname, buildDirName)));
 
-// Static files serving
-// app.get("/", function (req, res) {
-//   res.sendFile(path.join(__dirname, buildDirName, "index.html"));
-// });
+const timer = new Timer();
+// @ts-ignore
+app.post("/setTarget", jsonParser, (req, res) => {
+  const { target, interval, queueSize = 10 } = req.body;
+  timer.setInterval(interval);
+  timer.setTarget(target);
+  timer.setQueueSize(queueSize);
+  res.send({ success: true });
+});
+// @ts-ignore
+app.get("/startTimer", (req, res) => {
+  timer.start();
+  res.send({ success: true });
+});
 
-// Endpoint to set additional response delay
-app.post("/setResponseDelay", jsonParser, (req, res) => {
-  const newDelay = req.body.delay;
+// @ts-ignore
+app.get("/stopTimer", (req, res) => {
+  timer.stop();
+  res.send({ success: true });
+});
 
-  if (newDelay) {
-    delay = Number(newDelay);
-    res.send({
-      succes: true,
-      message: `Delay was set to ${delay}ms`,
-    });
-  } else {
-    res.status(400).send({
-      success: false,
-      message:
-        "'delay' field was not provided or incorrect format. Required one is number of milliseconds to delay responses",
-    });
-  }
-  // Log current timestamp to rps array
-  rpsArray.push(Date.now());
-  // Log delay to prometheus
-  httpRequestDurationMicroseconds.labels(req.route.path).observe(delay);
+// @ts-ignore
+app.get("/avgDelay", (req, res) => {
+  const delay = timer.getAverageDelay();
+  res.send({
+    avgDelay: delay,
+  });
+});
+
+app.get("/timerStatus", (req, res) => {
+  const timerStatus = timer.getTimerStatus();
+  res.send({
+    status: timerStatus,
+  });
 });
 
 // Endpoint for getting main information
+// @ts-ignore
 app.get("/config", (req, res) => {
   res.send({
     ip_address: ip.address(),
@@ -80,6 +88,7 @@ app.get("/config", (req, res) => {
 });
 
 // Enpdoint to get current server rps
+// @ts-ignore
 app.get("/rps", (req, res) => {
   rpsArray = rpsArray.filter((timestamp) => Date.now() - timestamp <= 1000);
   res.send({
@@ -87,21 +96,21 @@ app.get("/rps", (req, res) => {
   });
 });
 
-// Endpoint for testing delay
+// Endpoint for pinging
+// @ts-ignore
 app.get("/ping", (req, res) => {
-  setTimeout(() => {
-    res.send({ success: true });
-    // Log current timestamp to rps array
-    rpsArray.push(Date.now());
-    // Log delay to prometheus
-    httpRequestDurationMicroseconds.labels(req.route.path).observe(delay);
-  }, delay);
+  res.send({ success: true });
+  // Log current timestamp to rps array
+  rpsArray.push(Date.now());
+  // Log delay to prometheus
+  httpRequestDurationMicroseconds.labels(req.route.path).observe(delay);
 });
 
-// Metrics endpoint
+// Prometheus Metrics endpoint
+// @ts-ignore
 app.get("/metrics", (req, res) => {
   res.set("Content-Type", Prometheus.register.contentType);
-  Prometheus.register.metrics().then((data) => {
+  Prometheus.register.metrics().then((data: unknown) => {
     res.send(data);
     // Log current timestamp to rps array
     rpsArray.push(Date.now());
@@ -115,11 +124,13 @@ server = app.listen(port);
 console.log(`Server started on port ${port}`);
 
 process.on("SIGINT", () => {
+  // @ts-ignore
   server.close(() => {
     debug("\n SIGINT. Server shitdown");
   });
 });
 process.on("SIGTERM", () => {
+  // @ts-ignore
   server.close(() => {
     debug("\n SIGTERM. Server shitdown");
   });

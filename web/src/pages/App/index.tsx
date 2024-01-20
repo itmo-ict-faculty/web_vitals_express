@@ -2,24 +2,34 @@ import React, { useRef, useState } from "react";
 import "./index.css";
 import useGetConfig from "./hooks/useGetConfig";
 import useGetRps from "./hooks/useGetRps";
-import useDelayWatcher from "./hooks/useDelayWatcher";
+import { useGetAvgDelay } from "./hooks/useGetAvgDelay";
+import { useGetTimerStatus } from "./hooks/useGetTimerStatus";
+import { useGetTimerControls } from "./hooks/useGetTimerControls";
 
 const App: React.FC = () => {
   const [pingInterval, setPingInterval] = useState<number>(100);
   const [tempPingInterval, setTempPingInterval] = useState<number>(100);
   const pingIntervalInputRef = useRef<HTMLInputElement>(null);
 
-  const [host, setHost] = useState<string>("http://localhost:3000");
-  const hostInputRef = useRef<HTMLInputElement>(null);
+  const [watchTarget, setWatchTarget] = useState<string>(
+    "http://localhost:3000"
+  );
+  const watchTargetInputRef = useRef<HTMLInputElement>(null);
 
-  const { config } = useGetConfig({ target: host });
-  const { rps } = useGetRps({ target: host });
+  const [pingTarget, setPingTarget] = useState<string>("http://localhost:3000");
+  const pingTargetInputRef = useRef<HTMLInputElement>(null);
 
-  const { averageDelay, stopWatcher, startWatcher, timerStatus } =
-    useDelayWatcher({
-      target: host,
-      pingInterval,
-    });
+  // const [host, setHost] = useState<string>("http://localhost:3000");
+  // const hostInputRef = useRef<HTMLInputElement>(null);
+
+  const { config } = useGetConfig({ target: watchTarget });
+  const { rps } = useGetRps({ target: watchTarget });
+
+  const { delay: averageDelay } = useGetAvgDelay(watchTarget);
+  const timerStatus = useGetTimerStatus(watchTarget);
+
+  const { configurePinger, startTimer, stopTimer } =
+    useGetTimerControls(watchTarget);
 
   return (
     <div className="App">
@@ -51,34 +61,50 @@ const App: React.FC = () => {
         </div>
       </div>
       <div>
-        <div>Current target is: {host}</div>
+        <div>Current target is: {watchTarget} (Source container)</div>
         <div className="div-center mt-16">
-          <input placeholder={host} ref={hostInputRef} />
+          <input placeholder={watchTarget} ref={watchTargetInputRef} />
           <button
             onClick={() => {
-              if (hostInputRef.current !== null) {
-                setHost(hostInputRef.current.value);
-                if (timerStatus) {
-                  stopWatcher();
-                  startWatcher();
-                }
+              if (watchTargetInputRef.current !== null) {
+                setWatchTarget(watchTargetInputRef.current.value);
               } else {
                 console.log("Incorrect target in input");
               }
             }}
           >
-            Set new target
+            Set new source target
           </button>
         </div>
       </div>
+      <div>
+        <div>Backend target is: {pingTarget} (Target container)</div>
+        <div className="div-center mt-16">
+          <input placeholder={pingTarget} ref={pingTargetInputRef} />
+          <button
+            onClick={() => {
+              if (pingTargetInputRef.current !== null) {
+                setPingTarget(pingTargetInputRef.current.value);
+              } else {
+                console.log("Incorrect target in input");
+              }
+            }}
+          >
+            Set new reciever target
+          </button>
+        </div>
+      </div>
+      <button onClick={() => configurePinger(pingTarget, pingInterval)}>
+        Send reciever target to backend
+      </button>
       <div>
         <div>
           Ping controls. Pinger:{" "}
           {timerStatus !== undefined ? "running" : "stopped"}
         </div>
         <div className="div-center mt-16">
-          <button onClick={startWatcher}>Start pinger</button>
-          <button onClick={stopWatcher}>Stop pinger</button>
+          <button onClick={startTimer}>Start pinger</button>
+          <button onClick={stopTimer}>Stop pinger</button>
         </div>
       </div>
     </div>
