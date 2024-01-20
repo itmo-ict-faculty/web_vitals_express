@@ -23,7 +23,7 @@ const App: React.FC = () => {
   // const hostInputRef = useRef<HTMLInputElement>(null);
 
   const { config } = useGetConfig({ target: watchTarget });
-  const { rps } = useGetRps({ target: watchTarget });
+  const { rps } = useGetRps({ target: pingTarget });
 
   const { delay: averageDelay } = useGetAvgDelay(watchTarget);
   const timerStatus = useGetTimerStatus(watchTarget);
